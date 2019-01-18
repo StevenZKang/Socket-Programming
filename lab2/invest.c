@@ -4,7 +4,10 @@
 /*
  * Write a void function invest that takes your money and multiplies it by the given rate.
  */
+void invest(*p_principal, rate){
+    *p_principal = (*p_principal) * rate
 
+}
 
 /*
  * NOTE: don't change the main function!
@@ -24,3 +27,5 @@ int main(int argc, char **argv) {
     printf("%.2f\n", principal);
     return 0;
 }
+
+
