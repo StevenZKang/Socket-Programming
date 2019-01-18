@@ -7,11 +7,11 @@ int phone_loop(){
    int error = 0;
    scanf("%s",s1);
    
-   while(scanf("%i",&num1) != EOF){
+   while(scanf("%d",&num1) != EOF){
 	   if (num1 == -1){
 		printf("%s\n",s1);
 	   }
-	   else if(num1 >= 1 && num1 <= 9){
+	   else if(num1 >= 0 && num1 <= 9){
 		printf("%c\n",s1[num1]);
 	   }
 	   else{
