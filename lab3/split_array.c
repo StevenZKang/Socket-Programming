@@ -16,10 +16,11 @@ int **split_array(const int *s, int length) {
 	if(length%2 != 0){
 		extra = 1; 
 	}
-	odd_even[0] = malloc(sizeof(int) * (length/2));
-	odd_even[1] = malloc(sizeof(int) * ((length-extra)/2) );
+	odd_even[0] = malloc(sizeof(int) * ((length+extra)/2));
+	odd_even[1] = malloc(sizeof(int) * ((length)/2));
 	
-	int j,k = 0;
+	int j = 0;
+	int k = 0;
 	for(int i = 0; i < length;i++){
 		if(i == 0 || i%2 == 0){
 			odd_even[0][j] = s[i]; 
@@ -42,10 +43,10 @@ int **split_array(const int *s, int length) {
 
 int *build_array(char **strs, int size) {
 
-	int *intstrs = malloc(sizeof(int) * size-1);
+	int *intstrs = malloc(sizeof(int) * size);
 	
-	for(int i = 1; i < size; i++){
-		intstrs[i-1] = strtol(strs[i], NULL, 10);
+	for(int i = 0; i < size; i++){
+		intstrs[i] = strtol(strs[i], NULL, 10);
 	}
 	return intstrs; 
 }
@@ -54,7 +55,7 @@ int main(int argc, char **argv) {
        arguments.  Do not add any additional lines of code to the main
        function or make other changes.
      */
-    int *full_array = build_array(argv, argc);
+    int *full_array = build_array(&argv[1], argc-1);
     int **result = split_array(full_array, argc-1);
 
     printf("Original array:\n");
