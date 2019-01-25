@@ -15,6 +15,25 @@
  */
 
 /* Write your solution here */
+void fib(int** fb, int count){
+	
+	*fb = malloc(sizeof(int) * count);
+	
+	if(count > 0){
+		*fb[0] = 0;
+	}
+	if(count > 1){
+		*fb[1] = 1;
+	}
+	
+	if(count > 2){
+		int i = 2; 
+		for (i; i < count; i++){
+			*fb[i] = *fb[i-2] + *fb[i-1];
+		}
+	}
+	
+}
 
 
 int main(int argc, char **argv) {
