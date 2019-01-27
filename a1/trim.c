@@ -16,14 +16,31 @@ int main(int argc, char **argv) {
 
     // Addresses should be stored in unsigned long variables
     // unsigned long start_marker, end_marker;
-
-
-
+	fp = fopen(*(argv[2]), "r");
+	unsinged long start_marker;
+	unsinged long end_marker; 
+	unsinged long address; 
+	char access; 
+	
+	fscanf(fp, "%lx", &start_marker);
+	fscanf(fp, "%lx", &end_marker);
+	fclose(fp);
+	
+	fp2 = fopen(*(argv[1]), "r");
+	
+	do{
+		fscanf(fp2, "%*c %lx %*c %*i", &address);
+	}while(address != start_marker);
+	
+	while(address != end_marker){
+		fscanf(fp2, "%c %lx %*c %*i", &access , &address);
+		printf("%c,%#lx\n", access, start_address);
+	}
+		
     /* For printing output, use this exact formatting string where the
      * first conversion is for the type of memory reference, and the second
      * is the address
      */
     // printf("%c,%#lx\n", VARIABLES TO PRINT GO HERE);
-
     return 0;
 }
