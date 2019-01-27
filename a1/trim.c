@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	
 	while(address != end_marker){
 		fscanf(fp2, "%c %lx %*c %*i", &access , &address);
-		printf("%c,%#lx\n", access, start_address);
+		printf("%c,%#lx\n", access, address);
 	}
 		
     /* For printing output, use this exact formatting string where the
