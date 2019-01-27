@@ -16,17 +16,17 @@ int main(int argc, char **argv) {
 
     // Addresses should be stored in unsigned long variables
     // unsigned long start_marker, end_marker;
-	fp = fopen(*(argv[2]), "r");
-	unsinged long start_marker;
-	unsinged long end_marker; 
-	unsinged long address; 
+	FILE *fp = fopen(*(argv[2]), "r");
+	unsigned long start_marker;
+	unsigned long end_marker; 
+	unsigned long address; 
 	char access; 
 	
 	fscanf(fp, "%lx", &start_marker);
 	fscanf(fp, "%lx", &end_marker);
 	fclose(fp);
 	
-	fp2 = fopen(*(argv[1]), "r");
+	FILE *fp2 = fopen(*(argv[1]), "r");
 	
 	do{
 		fscanf(fp2, "%*c %lx %*c %*i", &address);
