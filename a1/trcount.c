@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     int GHS[3] = {0,0,0}; 
     
     // Check for address location 
-    while(fscanf(fp, "%c %lx", &access, &address) != EOF){
+    while(fscanf(fp, "%c,%lx", &access, &address) != EOF){
     	if (access == 'I'){
     		IMLS[0] += 1;
 		}
