@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 		else if (access == 'L'){
 			IMLS[2] += 1;
 		}
-		else if (access == 'S';){
+		else if (access == 'S'){
 			IMLS[3] += 1;
 		}
 		
