@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
 			}
 			printf("%c,%#lx\n", access, address);
 		}
+	}
 	
 	fclose(fp2);
 		
