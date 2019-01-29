@@ -30,8 +30,10 @@ int main(int argc, char **argv) {
 	
 	_Bool keep = 0; 
 	while(fscanf(fp2, "%c %lx,%*i", &access , &address)!= EOF){
-		if (keep == 0 && address == start_marker){
-			keep = 1;		
+		if (keep == 0){
+			if (address == start_marker){
+			keep = 1;
+			}
 		}
 		else{	
 			if (address == end_marker){
@@ -40,7 +42,7 @@ int main(int argc, char **argv) {
 			}
 			printf("%c,%#lx\n", access, address);
 		}
-	}
+	
 	fclose(fp2);
 		
     /* For printing output, use this exact formatting string where the
@@ -50,3 +52,4 @@ int main(int argc, char **argv) {
     // printf("%c,%#lx\n", VARIABLES TO PRINT GO HERE);
     return 0;
 }
+
