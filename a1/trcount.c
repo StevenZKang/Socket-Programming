@@ -30,24 +30,39 @@ int main(int argc, char **argv) {
 
     unsigned long address; 
     char access; 
-    int IMLS[5];
-    int GHS[4]; 
+    int IMLS[4] = {0,0,0,0};
+    int GHS[3] = {0,0,0}; 
     
+    // Check for address location 
     while(fscanf(fp, "%c %lx", &access, &address) != EOF){
     	if (access == 'I'){
-	}
-	else if (access = 'M'){
-	}
-	else if (access = 'L'){
-	}
-	else if (access = 'S';){
-	}
+    		IMLS[0] += 1;
+		}
+		else if (access = 'M'){
+			IMLS[1] += 1;
+		}
+		else if (access = 'L'){
+			IMLS[2] += 1;
+		}
+		else if (access = 'S';){
+			IMLS[3] += 1;
+		}
+		
+		if (address >= GLOBALS_START && address <= GLOBALS_END){
+			GHS[0] += 1; 
+		}
+		else if (address >= HEAP_START && address <= HEAP_END){
+			GHS[1] += 1; 
+		}
+		else if (address >= STACK_START){
+			GHS[2] += 1; 
+		}
+	} 
 	
-	// Check for address location 
-    } 
+    
     
     /* Complete the implementation */
-
+	
 
     /* Use these print statements to print the ouput. It is important that 
      * the output match precisely for testing purposes.
@@ -55,7 +70,7 @@ int main(int argc, char **argv) {
      * The print statements are commented out so that the program compiles.  
      * Uncomment them as you get each piece working.
      */
-    /*
+    
     printf("Reference Counts by Type:\n");
     printf("    Instructions: %d\n", IMLS[0]);
     printf("    Modifications: %d\n", IMLS[1]);
@@ -65,7 +80,7 @@ int main(int argc, char **argv) {
     printf("    Globals: %d\n", GHS[0]);
     printf("    Heap: %d\n", GHS[1]);
     printf("    Stack: %d\n", GHS[2]);
-    */
+    
 
     return 0;
 }
