@@ -29,12 +29,11 @@ void update_state(char *s, int size){
 	
 	for (int j = 1; j < size-1; j++){
 		if(flip[j] == 0){
-			s[j] = ".";
+			s[j] = '.';
 		}
 		else{
-			s[j] = "X"; 
+			s[j] = 'X'; 
 		}
 	}
-	
 	
 }

@@ -28,6 +28,24 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    unsigned long address; 
+    char access; 
+    int IMLS[5];
+    int GHS[4]; 
+    
+    while(fscanf(fp, "%c %lx", &access, &address) != EOF){
+    	if (access == 'I'){
+	}
+	else if (access = 'M'){
+	}
+	else if (access = 'L'){
+	}
+	else if (access = 'S';){
+	}
+	
+	// Check for address location 
+    } 
+    
     /* Complete the implementation */
 
 
@@ -39,14 +57,14 @@ int main(int argc, char **argv) {
      */
     /*
     printf("Reference Counts by Type:\n");
-    printf("    Instructions: %d\n", );
-    printf("    Modifications: %d\n", );
-    printf("    Loads: %d\n", );
-    printf("    Stores: %d\n", );
+    printf("    Instructions: %d\n", IMLS[0]);
+    printf("    Modifications: %d\n", IMLS[1]);
+    printf("    Loads: %d\n", IMLS[2]);
+    printf("    Stores: %d\n", IMLS[3]);
     printf("Data Reference Counts by Location:\n");
-    printf("    Globals: %d\n", );
-    printf("    Heap: %d\n", );
-    printf("    Stack: %d\n", );
+    printf("    Globals: %d\n", GHS[0]);
+    printf("    Heap: %d\n", GHS[1]);
+    printf("    Stack: %d\n", GHS[2]);
     */
 
     return 0;
