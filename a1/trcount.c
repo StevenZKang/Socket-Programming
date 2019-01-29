@@ -38,13 +38,13 @@ int main(int argc, char **argv) {
     	if (access == 'I'){
     		IMLS[0] += 1;
 		}
-		else if (access = 'M'){
+		else if (access == 'M'){
 			IMLS[1] += 1;
 		}
-		else if (access = 'L'){
+		else if (access == 'L'){
 			IMLS[2] += 1;
 		}
-		else if (access = 'S';){
+		else if (access == 'S';){
 			IMLS[3] += 1;
 		}
 		
