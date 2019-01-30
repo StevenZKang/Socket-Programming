@@ -21,6 +21,34 @@ int main(int argc, char **argv) {
     
     if(argc == 1) {
         fp = stdin;
+        while(scanf("%c", &access) != EOF){
+        	scanf("%lx", &address);
+		}
+		if (access == 'I'){
+	   		IMLS[0] += 1;
+		}			
+		else if (access == 'M'){
+			IMLS[1] += 1;
+		}
+		else if (access == 'L'){
+			IMLS[2] += 1;
+		}
+		else if (access == 'S'){
+			IMLS[3] += 1;
+		}
+		
+		if (access == 'M' || access == 'L' || access == 'S'){
+			if ((address >= GLOBALS_START) && (address <= GLOBALS_END)){
+				GHS[0] += 1; 
+			}				
+			else if ((address >= HEAP_START) && (address <= HEAP_END)){
+				GHS[1] += 1; 
+			}
+			else if (address >= STACK_START){
+				GHS[2] += 1; 
+			}		
+	}
+			
 
     } else if(argc == 2) {
         fp = fopen(argv[1], "r");
@@ -30,7 +58,7 @@ int main(int argc, char **argv) {
         }
         
         while(fscanf(fp, "%c,%lx", &access, &address) != EOF){
-        	printf("%c", access); 
+ 
 	    	if (access == 'I'){
 	    		IMLS[0] += 1;
 			}
@@ -55,7 +83,6 @@ int main(int argc, char **argv) {
 					GHS[2] += 1; 
 				}
 			}
-			printf("%#lx\n", address); 
 			
 	} 
     } else {
