@@ -13,7 +13,12 @@
 int main(int argc, char **argv) {
     
     FILE *fp = NULL;
-
+	unsigned long address; 
+    char access; 
+    char comma; 
+    int IMLS[4] = {0,0,0,0};
+    int GHS[3] = {0,0,0}; 
+    
     if(argc == 1) {
         fp = stdin;
 
@@ -23,41 +28,45 @@ int main(int argc, char **argv) {
             perror("fopen");
             exit(1);
         }
+        
+        while(fscanf(fp, "%c,%lx", &access, &address) != EOF){
+        	printf("%c", access); 
+	    	if (access == 'I'){
+	    		IMLS[0] += 1;
+			}
+			else if (access == 'M'){
+				IMLS[1] += 1;
+			}
+			else if (access == 'L'){
+				IMLS[2] += 1;
+			}
+			else if (access == 'S'){
+				IMLS[3] += 1;
+			}
+			
+			if (access == 'M' || access == 'L' || access == 'S'){
+				if ((address >= GLOBALS_START) && (address <= GLOBALS_END)){
+					GHS[0] += 1; 
+				}
+				else if ((address >= HEAP_START) && (address <= HEAP_END)){
+					GHS[1] += 1; 
+				}
+				else if (address >= STACK_START){
+					GHS[2] += 1; 
+				}
+			}
+			printf("%#lx\n", address); 
+			
+	} 
     } else {
         fprintf(stderr, "Usage: %s [tracefile]\n", argv[0]);
         exit(1);
-    }
+    } 
 
-    unsigned long address; 
-    char access; 
-    int IMLS[4] = {0,0,0,0};
-    int GHS[3] = {0,0,0}; 
+
     
     // Check for address location 
-    while(fscanf(fp, "%c,%lx", &access, &address) != EOF){
-    	if (access == 'I'){
-    		IMLS[0] += 1;
-		}
-		else if (access == 'M'){
-			IMLS[1] += 1;
-		}
-		else if (access == 'L'){
-			IMLS[2] += 1;
-		}
-		else if (access == 'S'){
-			IMLS[3] += 1;
-		}
-		
-		if (address >= GLOBALS_START && address <= GLOBALS_END){
-			GHS[0] += 1; 
-		}
-		else if (address >= HEAP_START && address <= HEAP_END){
-			GHS[1] += 1; 
-		}
-		else if (address >= STACK_START){
-			GHS[2] += 1; 
-		}
-	} 
+
 	
     
     
