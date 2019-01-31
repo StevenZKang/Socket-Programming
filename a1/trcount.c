@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     if(argc == 1) {
         fp = stdin;
         while(scanf("%c", &access) != EOF){
-        	scanf("%lx", &address);
+        scanf("%lx", &address);
 		}
 		if (access == 'I'){
 	   		IMLS[0] += 1;
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
         
-        while(fscanf(fp, "%c,%lx", &access, &address) != EOF){
+        while(fscanf(fp, "%c,%lx\n", &access, &address) != EOF){
  
 	    	if (access == 'I'){
 	    		IMLS[0] += 1;

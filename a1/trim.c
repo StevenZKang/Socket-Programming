@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,7 +31,7 @@ int main(int argc, char **argv) {
 	
 	
 	_Bool keep = 0; 
-	while(fscanf(fp2, "%c %lx,%*i", &access , &address)!= EOF){
+	while(fscanf(fp2, "%c %lx,%*i\n", &access , &address)!= EOF){
 		if (keep == 0){
 			if (address == start_marker){
 			keep = 1;
