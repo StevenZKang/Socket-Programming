@@ -15,7 +15,6 @@ int main(int argc, char **argv) {
     FILE *fp = NULL;
 	unsigned long address; 
     char access; 
-    char comma; 
     int IMLS[4] = {0,0,0,0};
     int GHS[3] = {0,0,0}; 
     
