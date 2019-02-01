@@ -20,9 +20,9 @@ int truncate(char*s, int n){
 		char s2[n+1];
 		//Doesn't add a Null Terminator to the end
 		strncpy(s2, s, n);
-		s2[n+1] = '\0';
+		s2[n] = '\0';
 		strcpy(s, s2); 
-		s[n+1] = '\0';
+		s[n] = '\0';
 		return length - n; 
 	}
 }

@@ -42,14 +42,14 @@ int main(int argc, char **argv) {
     strncpy(greeting, argv[1], 19); 
     
     if (message_length >= 19){
-	greeting[20] = '\0';
+	greeting[19] = '\0';
     }  
     else if (message_length == 18){
-	greeting[message_length+1] = '\0';
+	greeting[message_length] = '\0';
 	strcat(greeting, " "); 
     }
     else{
-	greeting[message_length+1] = '\0';
+	greeting[message_length] = '\0';
 	strcat(greeting, " "); 
 	strncat(greeting, name, 19 - (message_length+1)); 
     }

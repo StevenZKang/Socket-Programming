@@ -30,9 +30,9 @@ int strip_q_marks(char *s){
 	}
 	char s2[length-n+1];
 	strncpy(s2, s, length-n); 
-	s2[length-n+1] = '\0';
+	s2[length-n] = '\0';
 	strcpy(s, s2);
-	s[length-n+1] = '\0';
+	s[length-n] = '\0';
 	return n; 
 	
 }
