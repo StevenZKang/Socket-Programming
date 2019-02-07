@@ -9,7 +9,7 @@
    using realloc, when the family is full.
 */
 static int family_increment = 0;
-
+	
 
 /* Set family_increment to size, and initialize random number generator.
    The random number generator is used to select a random word from a family.
@@ -48,7 +48,14 @@ void print_families(Family* fam_list) {
    maxwords to family_increment, and next to NULL.
 */
 Family *new_family(char *str) {
-    return NULL;
+	Family *new_fam = malloc(sizeof(Family));
+	(*new_fam).signature = str; 
+	char ** new_word_ptrs = malloc(sizeof(char*) * (family_increment+1));
+	(*new_fam).word_ptrs = new_word_ptrs;
+	(*new_fam).num_words = 0;
+	(*new_fam).max_words = family_increment; 
+	(*new_fam).next = NULL; 
+	return new_fam;
 }
 
 
@@ -57,7 +64,14 @@ Family *new_family(char *str) {
    more pointers and then add the new pointer.
 */
 void add_word_to_family(Family *fam, char *word) {
-    return;
+    //Check if word_ptrs is full
+    if ( fam->num_words >= fam->max_words ){
+    	fam->word_ptrs = realloc(fam->word_ptrs, sizeof(fam->word_ptrs) + (sizeof(char*) * family_increment)); 
+    	fam->max_words += family_increment;
+	}
+	
+	(*fam).word_ptrs[(*fam).num_words] = word;
+	(*fam).num_words++;
 }
 
 
@@ -66,6 +80,15 @@ void add_word_to_family(Family *fam, char *word) {
    fam_list is a pointer to the head of a list of Family nodes.
 */
 Family *find_family(Family *fam_list, char *sig) {
+	//Iterate through the linked list of fams until one with sig is found
+	Family *curr_fam = fam_list; 
+	while(curr_fam != NULL){
+		//If the strings are equal
+		if(strcmp(curr_fam->signature, sig) == 0){
+			return curr_fam; 
+		}
+		curr_fam = curr_fam->next;
+	}
     return NULL;
 }
 
@@ -76,16 +99,32 @@ Family *find_family(Family *fam_list, char *sig) {
    fam_list is a pointer to the head of a list of Family nodes.
 */
 Family *find_biggest_family(Family *fam_list) {
-    return NULL;
+    Family *largest_fam = fam_list;
+    Family *curr_fam = fam_list; 
+    //Will return the first largest family
+	while(curr_fam != NULL){
+		if (curr_fam->num_words > largest_fam->num_words){
+			largest_fam = curr_fam; 
+		}
+		curr_fam = curr_fam->next;
+	}
+	return largest_fam;
 }
 
 
 /* Deallocate all memory rooted in the List pointed to by fam_list. */
 void deallocate_families(Family *fam_list) {
-    return;
+    Family *curr_fam = fam_list;
+    while(curr_fam != NULL){
+    	free(curr_fam->word_ptrs);
+    	free(curr_fam);    
+    	curr_fam = curr_fam->next;
+	}
 }
 
-
+char generate_sig(char *word, char *word_sig, char letter){
+	return NULL; 
+}
 /* Generate and return a linked list of all families using words pointed to
    by word_list, using letter to partition the words.
 
@@ -94,7 +133,40 @@ void deallocate_families(Family *fam_list) {
    that have at least one word from the current word_list.
 */
 Family *generate_families(char **word_list, char letter) {
-    return NULL;
+	
+	int index = 0;
+	_Bool match;
+	Family *fam_list = NULL; 
+	Family *fam_end = fam_list; 
+	
+	char word_sig[strlen(word_list[0])]; 
+	//Generate signature for word 
+	while(word_list[index]){
+		
+		generate_sig(word_list[index], word_sig, letter);
+		match = 0; 
+		Family curr_fam = fam_list;
+		
+		//Compare signature with current family signatures
+		while(curr_fam != NULL){
+			//If signature matches a family signatures, append word to fam
+			if (strcmp(curr_fam->signature, word_sig) == 0){
+				match = 1;
+				add_word_to_family(curr_fam, word_list[index]);
+			}
+			
+		}
+		//If no matches then create a new fam with that signature and append it to linked list
+		if(!match){
+			fam_end->next = new_family(word_sig);
+			fam_end = fam_end->next;
+			add_word_to_family(end_fam, word_list[index]);
+		}
+		
+		index++; 
+	}
+	
+    return fam_list;
 }
 
 
