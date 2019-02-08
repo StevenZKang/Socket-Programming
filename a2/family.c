@@ -116,9 +116,11 @@ Family *find_biggest_family(Family *fam_list) {
 void deallocate_families(Family *fam_list) {
     Family *curr_fam = fam_list;
     while(curr_fam != NULL){
+		temp_fam = curr_fam->next;
     	free(curr_fam->word_ptrs);
     	free(curr_fam);    
-    	curr_fam = curr_fam->next;
+    	curr_fam = temp_fam; 
+    	
 	}
 }
 
@@ -172,7 +174,7 @@ Family *generate_families(char **word_list, char letter) {
 
 /* Return the signature of the family pointed to by fam. */
 char *get_family_signature(Family *fam) {
-    return NULL;
+    return fam->signature;
 }
 
 
@@ -183,7 +185,12 @@ char *get_family_signature(Family *fam) {
    As with fam->word_ptrs, the final pointer should be NULL.
 */
 char **get_new_word_list(Family *fam) {
-    return NULL;
+	count = fam->num_words; 
+    char **ptr = malloc(sizeof(char*) *count);
+    for(int i = 0; i < count, i++){
+    	ptr[i] = fam->word_ptrs[i]; 
+	}
+	return ptr; 
 }
 
 
@@ -191,5 +198,6 @@ char **get_new_word_list(Family *fam) {
    Use rand (man 3 rand) to generate random integers.
 */
 char *get_random_word_from_family(Family *fam) {
-    return NULL;
+	random = rand() % fam->num_words;
+    return fam->word_ptrs[random];
 }

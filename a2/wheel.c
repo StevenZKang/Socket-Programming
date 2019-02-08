@@ -15,7 +15,28 @@
    Note: Do not make copies of the words.
 */
 char **prune_word_list(char **words, int len, int *words_remaining) {
-    return NULL;
+	*words_remaining = 0;
+	int i = 0;
+	int count = 0;
+	//Count how many words are of length len
+	while(words[i] != NULL){
+		if (strlen(words[i]) == len){
+			 count++;
+		}
+		i++;
+	}
+	
+	//if word is of length len add its pointer to the array 
+	char **word_list = malloc(sizeof(char*) * count); 
+	i = 0;
+	while(words[i] != NULL){
+		if (strlen(words[i]) == len){
+			 word_list[*words_remaining] = words[i];
+			 *words_remaining++;
+		}
+		i++;
+	}
+    return word_list;
 }
 
 
@@ -42,7 +63,24 @@ void deallocate_pruned_word_list(char **word_list) {
     printf("There are no words of that length.\n");
 */
 char **get_word_list_of_length(char **words, int *len) {
-    return NULL;
+	
+	char input_buffer[BUF_SIZE];
+	char **word_list; 
+	int word_count; 	
+	
+	do{
+		printf("Length of words to use? ");
+		if (fgets(input_buffer, BUF_SIZE, stdin) == NULL) {
+        	perror("fgets");
+        	exit(1);
+    	}
+
+    	*len = strtol(input_buffer, NULL, 10);
+    	word_list = prune_word_list(words, *len, &word_count);
+	}while(word_count == 0);
+	
+	
+    return word_list;
 }
 
 
