@@ -8,7 +8,11 @@
  * height in the given bitmap file.
  */
 void read_bitmap_metadata(FILE *image, int *pixel_array_offset, int *width, int *height) {
-	fseek(image, 10, SEEK_SET);
+	
+	if (fseek(image, 10, SEEK_SET) != 0){
+		fprintf(stderr, "Seek Error\n");
+        exit(1);
+	}
 	fread(pixel_array_offset, 4, 1, image);
 
 	fseek(image, 18, SEEK_SET);
