@@ -115,6 +115,7 @@ Family *find_biggest_family(Family *fam_list) {
 /* Deallocate all memory rooted in the List pointed to by fam_list. */
 void deallocate_families(Family *fam_list) {
     Family *curr_fam = fam_list;
+    Family *temp_fam; 
     while(curr_fam != NULL){
 		temp_fam = curr_fam->next;
     	free(curr_fam->word_ptrs);
@@ -124,9 +125,15 @@ void deallocate_families(Family *fam_list) {
 	}
 }
 
-char generate_sig(char *word, char *word_sig, char letter){
-	return NULL; 
+/*Updates word_sig into the signature of a word given the guessed letter
+
+  Helper function for generate_families
+*/
+void generate_sig(char *word, char *word_sig, char letter){
+	
 }
+
+
 /* Generate and return a linked list of all families using words pointed to
    by word_list, using letter to partition the words.
 
@@ -147,7 +154,7 @@ Family *generate_families(char **word_list, char letter) {
 		
 		generate_sig(word_list[index], word_sig, letter);
 		match = 0; 
-		Family curr_fam = fam_list;
+		Family *curr_fam = fam_list;
 		
 		//Compare signature with current family signatures
 		while(curr_fam != NULL){
@@ -162,7 +169,7 @@ Family *generate_families(char **word_list, char letter) {
 		if(!match){
 			fam_end->next = new_family(word_sig);
 			fam_end = fam_end->next;
-			add_word_to_family(end_fam, word_list[index]);
+			add_word_to_family(fam_end, word_list[index]);
 		}
 		
 		index++; 
@@ -185,9 +192,9 @@ char *get_family_signature(Family *fam) {
    As with fam->word_ptrs, the final pointer should be NULL.
 */
 char **get_new_word_list(Family *fam) {
-	count = fam->num_words; 
+	int count = fam->num_words; 
     char **ptr = malloc(sizeof(char*) *count);
-    for(int i = 0; i < count, i++){
+    for(int i = 0; i < count; i++){
     	ptr[i] = fam->word_ptrs[i]; 
 	}
 	return ptr; 
@@ -198,6 +205,6 @@ char **get_new_word_list(Family *fam) {
    Use rand (man 3 rand) to generate random integers.
 */
 char *get_random_word_from_family(Family *fam) {
-	random = rand() % fam->num_words;
+	int random = rand() % fam->num_words;
     return fam->word_ptrs[random];
 }

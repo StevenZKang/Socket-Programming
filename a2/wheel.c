@@ -32,7 +32,7 @@ char **prune_word_list(char **words, int len, int *words_remaining) {
 	while(words[i] != NULL){
 		if (strlen(words[i]) == len){
 			 word_list[*words_remaining] = words[i];
-			 *words_remaining++;
+			 (*words_remaining)++;
 		}
 		i++;
 	}
