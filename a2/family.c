@@ -130,7 +130,17 @@ void deallocate_families(Family *fam_list) {
   Helper function for generate_families
 */
 void generate_sig(char *word, char *word_sig, char letter){
-	
+	int i = 0;
+	while(word[i]){
+		if(word[i] == letter){
+			word_sig[i] = letter;
+		}
+		else{
+			word_sig[i] = '-'; 
+		}
+		i++;
+	}
+	word_sig[i] = '\0';
 }
 
 
@@ -148,7 +158,7 @@ Family *generate_families(char **word_list, char letter) {
 	Family *fam_list = NULL; 
 	Family *fam_end = fam_list; 
 	
-	char word_sig[strlen(word_list[0])]; 
+	char word_sig[strlen(word_list[0])+1]; 
 	//Generate signature for word 
 	while(word_list[index]){
 		
