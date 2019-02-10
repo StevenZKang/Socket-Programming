@@ -49,8 +49,13 @@ void print_families(Family* fam_list) {
 */
 Family *new_family(char *str) {
 	Family *new_fam = malloc(sizeof(Family));
-	(*new_fam).signature = str; 
+	(*new_fam).signature = malloc(sizeof(char) * (strlen(str)+1));
+	strcpy((*new_fam).signature, str);
 	char ** new_word_ptrs = malloc(sizeof(char*) * (family_increment+1));
+	if (new_word_ptrs == NULL){
+		printf("word_ptrs malloc error");
+		exit(1);
+	}
 	(*new_fam).word_ptrs = new_word_ptrs;
 	(*new_fam).num_words = 0;
 	(*new_fam).max_words = family_increment; 
@@ -67,10 +72,14 @@ void add_word_to_family(Family *fam, char *word) {
     //Check if word_ptrs is full
     if ( fam->num_words >= fam->max_words ){
     	fam->word_ptrs = realloc(fam->word_ptrs, (sizeof(char*) * (family_increment + fam->num_words))); 
+    	if (new_word_ptrs == NULL){
+		printf("word_ptrs realloc error");
+		exit(1);
+	}
     	fam->max_words += family_increment;
 	}
 	
-	(*fam).word_ptrs[(*fam).num_words] = word;
+	(*fam).word_ptrs[fam->num_words] = word;
 	(*fam).num_words++;
 }
 
