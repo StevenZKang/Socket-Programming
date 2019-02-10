@@ -128,7 +128,9 @@ void deallocate_families(Family *fam_list) {
     while(curr_fam != NULL){
 		temp_fam = curr_fam->next;
     	free(curr_fam->word_ptrs);
-    	free(curr_fam);    
+    	free(curr_fam->signature); 
+    	free(curr_fam);
+		   
     	curr_fam = temp_fam; 
     	
 	}

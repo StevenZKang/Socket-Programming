@@ -27,7 +27,7 @@ char **prune_word_list(char **words, int len, int *words_remaining) {
 	}
 	
 	//if word is of length len add its pointer to the array 
-	char **word_list = malloc(sizeof(char*) * count); 
+	char **word_list = malloc(sizeof(char*) * (count+1)); 
 	i = 0;
 	while(words[i] != NULL){
 		if (strlen(words[i]) == len){
@@ -36,6 +36,8 @@ char **prune_word_list(char **words, int len, int *words_remaining) {
 		}
 		i++;
 	}
+	
+	word_list[count+1] = '\0';
     return word_list;
 }
 
