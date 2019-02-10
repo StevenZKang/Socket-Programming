@@ -177,8 +177,15 @@ Family *generate_families(char **word_list, char letter) {
 		}
 		//If no matches then create a new fam with that signature and append it to linked list
 		if(!match){
-			fam_end->next = new_family(word_sig);
-			fam_end = fam_end->next;
+			//Check if this is first family 
+			if (fam_list == NULL){
+				fam_list = new_family(word_sig);
+				fam_end = fam_list; 
+			}
+			else{
+				fam_end->next = new_family(word_sig);
+				fam_end = fam_end->next;
+			}
 			add_word_to_family(fam_end, word_list[index]);
 		}
 		
