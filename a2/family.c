@@ -49,14 +49,26 @@ void print_families(Family* fam_list) {
 */
 Family *new_family(char *str) {
 	Family *new_fam = malloc(sizeof(Family));
+	if (new_fam == NULL){
+		printf("new fam malloc error");
+		exit(1);
+	}
+	
 	(*new_fam).signature = malloc(sizeof(char) * (strlen(str)+1));
+	if ((*new_fam).signature == NULL){
+		printf("sig malloc error");
+		exit(1);
+	}
 	strcpy((*new_fam).signature, str);
-	char ** new_word_ptrs = malloc(sizeof(char*) * (family_increment+1));
-	if (new_word_ptrs == NULL){
+	
+	
+	(*new_fam).word_ptrs = malloc(sizeof(char*) * (family_increment+1));
+	if ((*new_fam).word_ptrs == NULL){
 		printf("word_ptrs malloc error");
 		exit(1);
 	}
-	(*new_fam).word_ptrs = new_word_ptrs;
+	
+	
 	(*new_fam).num_words = 0;
 	(*new_fam).max_words = family_increment; 
 	(*new_fam).next = NULL; 
@@ -165,29 +177,21 @@ void generate_sig(char *word, char *word_sig, char letter){
 Family *generate_families(char **word_list, char letter) {
 	
 	int index = 0;
-	_Bool match;
 	Family *fam_list = NULL; 
 	Family *fam_end = fam_list; 
-	
 	char word_sig[strlen(word_list[0])+1]; 
-	//Generate signature for word 
+	
 	while(word_list[index]){
 		
 		generate_sig(word_list[index], word_sig, letter);
-		match = 0; 
-		Family *curr_fam = fam_list;
 		
 		//Compare signature with current family signatures
-		while(curr_fam != NULL){
-			//If signature matches a family signatures, append word to fam
-			if (strcmp(curr_fam->signature, word_sig) == 0){
-				match = 1;
-				add_word_to_family(curr_fam, word_list[index]);
-			}
-			
+		Family *curr_fam = find_family(fam_list, word_sig);
+		if (curr_fam != NULL){
+			add_word_to_family(curr_fam, word_list[index]);
 		}
 		//If no matches then create a new fam with that signature and append it to linked list
-		if(!match){
+		else{
 			//Check if this is first family 
 			if (fam_list == NULL){
 				fam_list = new_family(word_sig);
@@ -202,7 +206,7 @@ Family *generate_families(char **word_list, char letter) {
 		
 		index++; 
 	}
-	
+
     return fam_list;
 }
 
@@ -221,10 +225,11 @@ char *get_family_signature(Family *fam) {
 */
 char **get_new_word_list(Family *fam) {
 	int count = fam->num_words; 
-    char **ptr = malloc(sizeof(char*) *count);
+    char **ptr = malloc(sizeof(char*) *(count+1));
     for(int i = 0; i < count; i++){
     	ptr[i] = fam->word_ptrs[i]; 
 	}
+	ptr[count] = NULL;
 	return ptr; 
 }
 

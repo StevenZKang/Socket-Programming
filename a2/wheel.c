@@ -37,7 +37,7 @@ char **prune_word_list(char **words, int len, int *words_remaining) {
 		i++;
 	}
 	
-	word_list[count+1] = NULL;
+	word_list[count] = NULL;
     return word_list;
 }
 
