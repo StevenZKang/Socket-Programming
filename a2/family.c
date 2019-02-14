@@ -83,7 +83,6 @@ Family *new_family(char *str) {
 void add_word_to_family(Family *fam, char *word) {
     //Check if word_ptrs is full
     if ( fam->num_words >= fam->max_words ){
-    	free((*fam).word_ptrs[fam->num_words]);
     	fam->word_ptrs = realloc(fam->word_ptrs, (sizeof(char*) * (family_increment+1 + fam->num_words))); 
     	if (fam->word_ptrs == NULL){
 			perror("word_ptrs realloc error");
