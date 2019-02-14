@@ -50,13 +50,13 @@ void print_families(Family* fam_list) {
 Family *new_family(char *str) {
 	Family *new_fam = malloc(sizeof(Family));
 	if (new_fam == NULL){
-		printf("new fam malloc error");
+		perror("new fam malloc error");
 		exit(1);
 	}
 	
 	(*new_fam).signature = malloc(sizeof(char) * (strlen(str)+1));
 	if ((*new_fam).signature == NULL){
-		printf("sig malloc error");
+		perror("sig malloc error");
 		exit(1);
 	}
 	strcpy((*new_fam).signature, str);
@@ -64,7 +64,7 @@ Family *new_family(char *str) {
 	
 	(*new_fam).word_ptrs = malloc(sizeof(char*) * (family_increment+1));
 	if ((*new_fam).word_ptrs == NULL){
-		printf("word_ptrs malloc error");
+		perror("word_ptrs malloc error");
 		exit(1);
 	}
 	
@@ -83,16 +83,18 @@ Family *new_family(char *str) {
 void add_word_to_family(Family *fam, char *word) {
     //Check if word_ptrs is full
     if ( fam->num_words >= fam->max_words ){
-    	fam->word_ptrs = realloc(fam->word_ptrs, (sizeof(char*) * (family_increment + fam->num_words))); 
+    	free((*fam).word_ptrs[fam->num_words]);
+    	fam->word_ptrs = realloc(fam->word_ptrs, (sizeof(char*) * (family_increment+1 + fam->num_words))); 
     	if (fam->word_ptrs == NULL){
-		printf("word_ptrs realloc error");
+			perror("word_ptrs realloc error");
 		exit(1);
-	}
+		}
     	fam->max_words += family_increment;
 	}
 	
 	(*fam).word_ptrs[fam->num_words] = word;
 	(*fam).num_words++;
+	(*fam).word_ptrs[fam->num_words] = NULL; 
 }
 
 
@@ -206,7 +208,6 @@ Family *generate_families(char **word_list, char letter) {
 		
 		index++; 
 	}
-
     return fam_list;
 }
 
