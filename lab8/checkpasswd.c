@@ -32,15 +32,14 @@ int main(void) {
       exit(1);
   }
   
-  
   if ((pipe(pipe_fd)) == -1) {
 	perror("pipe");
 	exit(1);
   }
 
   close(pipe_fd[0]);
-  write(pipe_fd[1], user_id, MAXLINE);
-  write(pipe_fd[1], password, MAXLINE);
+  write(pipe_fd[1], user_id, MAX_PASSWORD);
+  write(pipe_fd[1], password, MAX_PASSWORD);
 	
   int ret;
   char *argv[1];
