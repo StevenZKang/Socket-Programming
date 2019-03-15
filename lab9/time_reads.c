@@ -33,6 +33,8 @@ unsigned int alarm(unsigned int seconds){
 	new.it_value.tv_sec = (long int) seconds;
 	if (setitimer (ITIMER_PROF, &new, &old) < 0){
 		return 0;
+	}else{
+		 return old.it_value.tv_sec;
 	}
     
 }
