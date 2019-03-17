@@ -2,8 +2,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include "helper.h"
 
+#define EMPTY 40000
 
 int get_file_size(char *filename) {
     struct stat sbuf;
@@ -30,3 +32,62 @@ int compare_freq(const void *rec1, const void *rec2) {
         return -1;
     }
 }
+
+//Divide file_size into N evenly distributed groups
+int divide_even(int * child_sizes, int N, int file_size){
+	
+	if (N <= 0){
+		return 1;
+	}
+	int q = file_size/N;
+	printf("%i\n", q);
+	int r = file_size % N; 
+	printf("%i\n", r);
+	//memset(child_sizes, q, N);
+	//Increment the first r elements by 1
+	for (int i = 0; i < N; i++){
+		child_sizes[i] = q;
+		if(r > 0){
+			child_sizes[i]++;
+			r--;
+		} 
+	}
+	return 0; 
+}
+
+void merge(int pipe_fd[][2],int N, FILE *outfp){
+	
+	struct rec first_layer[N];
+	int smallest;
+	
+	//Fill first_layer from reading end of pipes
+	for(int j = 0; j < N; j++){
+		read(pipe_fd[j][0], &first_layer[j], sizeof(struct rec));
+	}
+	
+	
+    while(1){
+		smallest = 0;
+		//Loop through first_layer to find rec with smallest freq
+		for(int i = 0; i < N; i++){
+			if(compare_freq(&first_layer[smallest],&first_layer[i]) == 1){
+				smallest = i;
+			}
+		}
+		
+		//Exit loop is first_layer is competely EMPTY
+		if(first_layer[smallest].freq == EMPTY){
+			break; 
+		}
+		
+		fwrite(&first_layer[smallest], sizeof(struct rec), 1, outfp);
+		printf("word : %s freq : %i\n", first_layer[smallest].word, first_layer[smallest].freq);
+		//If there is no more recs in the pipe to read, set that index's rec to EMPTY
+		if (read(pipe_fd[smallest][0], &first_layer[smallest], sizeof(struct rec)) == 0){
+			printf("Pipe Empty \n");
+			first_layer[smallest].freq = EMPTY; 
+		}	
+	}
+				
+}
+
