@@ -45,11 +45,15 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
         	exit(1);
     		}
     		
-			//Each child will read in 1/N of the file and use qsort to sort it	
+			//Each child will read in 1/N of the file and use qsort to sort it
+			int offset_sum = 0;
+			for(int k = 0; k < i; k++){
+				offset_sum += child_sizes[k];
+			}
+			fseek(infp, sizeof(struct rec)*offset_sum, SEEK_SET);	
 			fread(temp_recs, sizeof(struct rec), child_sizes[i], infp); 
 			qsort(temp_recs, child_sizes[i], sizeof(struct rec), compare_freq); 
 			
-			//print_structs(temp_recs, child_sizes[i]);
 			
 			//After sorting each child will write each record to the pipe
 			write(pipe_fd[i][1], temp_recs, sizeof(struct rec) * child_sizes[i]); 
