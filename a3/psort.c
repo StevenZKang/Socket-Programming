@@ -132,7 +132,6 @@ int main(int argc, char** argv){
 	printf("%i\n",child_sizes[N-1]);
 	
 	process_sort(N, child_sizes, infile, outfp);
-	fclose(outfp);
 	return 0;
 }
 
