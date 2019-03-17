@@ -13,7 +13,7 @@ void print_structs(struct rec* rec_array, int n){
 	}
 }
 
-void process_sort(int N, int *child_sizes, FILE *infp, FILE *outfp){
+void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 
 	int pipe_fd[N][2];
 	//Create n child processes and set each child to where it should read 
@@ -38,6 +38,13 @@ void process_sort(int N, int *child_sizes, FILE *infp, FILE *outfp){
 			//Allocate memory to temporarily store structs for sorting
 			struct rec *temp_recs = malloc(sizeof(struct rec) * child_sizes[i]);
 			
+			//Open file pointer in child
+			FILE* infp;
+			if ((infp = fopen(infile, "rb")) == NULL) {
+        		fprintf(stderr, "Could not open %s\n", infile);
+        	exit(1);
+    		}
+    		
 			//Each child will read in 1/N of the file and use qsort to sort it	
 			fread(temp_recs, sizeof(struct rec), child_sizes[i], infp); 
 			qsort(temp_recs, child_sizes[i], sizeof(struct rec), compare_freq); 
@@ -50,6 +57,7 @@ void process_sort(int N, int *child_sizes, FILE *infp, FILE *outfp){
 			
 			//Free Memory
 			free(temp_recs); 
+			fclose(infp);
 			exit(0); 
 		
 		}else{
@@ -59,7 +67,7 @@ void process_sort(int N, int *child_sizes, FILE *infp, FILE *outfp){
 	}
 	//Parent will merge the data from each of the children and write to output file
 	merge(pipe_fd, N, outfp);
-	
+	fclose(outfp); 
 }
 
 
@@ -71,7 +79,7 @@ int main(int argc, char** argv){
     int file_size; 
     char *infile = NULL;
     char *outfile = NULL; 
-    FILE *infp, *outfp; 
+    FILE *outfp; 
 
     if (argc != 7) {
         fprintf(stderr, "Usage: psort -n <number of processes> -f <input file name> -o <output file name>\n");
@@ -95,12 +103,7 @@ int main(int argc, char** argv){
             exit(1);
         }
     }
-   
-    if ((infp = fopen(infile, "rb")) == NULL) {
-        fprintf(stderr, "Could not open %s\n", infile);
-        exit(1);
-    }
-    
+       
     if ((outfp = fopen(outfile, "wb")) == NULL) {
         fprintf(stderr, "Could not open %s\n", outfile);
         exit(1);
@@ -124,8 +127,7 @@ int main(int argc, char** argv){
 	printf("%i\n",child_sizes[0]);
 	printf("%i\n",child_sizes[N-1]);
 	
-	process_sort(N, child_sizes, infp, outfp);
-	fclose(infp);
+	process_sort(N, child_sizes, infile, outfp);
 	fclose(outfp);
 	return 0;
 }
