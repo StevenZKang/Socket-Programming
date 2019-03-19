@@ -6,9 +6,10 @@
 #include <time.h>
 #include "helper.h"
 
-void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
+void process_sort(int N, int *child_sizes, char *infile, char* outfile){
 
 	int pipe_fd[N][2];
+	FILE *outfp; 
 	//Create n child processes and set each child to where it should read 
 	for (int i = 0; i < N; i++){
 	
@@ -91,7 +92,13 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 			}
 		}
 	}
-	//Parent will merge the data from each of the children and write to output file
+	
+	if ((outfp = fopen(outfile, "wb")) == NULL) {
+        fprintf(stderr, "Could not open %s\n", outfile);
+        exit(1);
+    }
+    
+    //Parent will merge the data from each of the children and write to output file
 	merge(pipe_fd, N, outfp);
 	for(int m = 0; m < N; m++){
 		if(close(pipe_fd[m][0]) == -1){
@@ -114,7 +121,7 @@ int main(int argc, char** argv){
     int file_size; 
     char *infile = NULL;
     char *outfile = NULL; 
-    FILE *outfp; 
+    
 
     if (argc != 7) {
         fprintf(stderr, "Usage: psort -n <number of processes> -f <input file name> -o <output file name>\n");
@@ -138,13 +145,8 @@ int main(int argc, char** argv){
             exit(1);
         }
     }
-       
-    if ((outfp = fopen(outfile, "wb")) == NULL) {
-        fprintf(stderr, "Could not open %s\n", outfile);
-        exit(1);
-    }
 
-    //Get the outfile size 
+    //Get the infile size 
     file_size = get_file_size(infile)/sizeof(struct rec);
     if(file_size == 0){
     	exit(0);
@@ -160,7 +162,7 @@ int main(int argc, char** argv){
     	exit(0); 
 	}
 	
-	process_sort(N, child_sizes, infile, outfp);
+	process_sort(N, child_sizes, infile, outfile);
 	return 0;
 }
 
