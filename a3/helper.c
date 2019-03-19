@@ -83,10 +83,10 @@ void merge(int pipe_fd[][2],int N, FILE *outfp){
 		if(fwrite(&first_layer[smallest], sizeof(struct rec), 1, outfp) != 1){
 			fprintf(stderr, "fwrite error"); 
 		}
-		printf("word : %s freq : %i\n", first_layer[smallest].word, first_layer[smallest].freq);
+		//printf("word : %s freq : %i\n", first_layer[smallest].word, first_layer[smallest].freq);
 		//If there is no more recs in the pipe to read, set that index's rec to EMPTY
 		if (read(pipe_fd[smallest][0], &first_layer[smallest], sizeof(struct rec)) == 0){
-			printf("Pipe Empty \n");
+			//printf("Pipe Empty \n");
 			first_layer[smallest].freq = EMPTY; 
 		}	
 	}
