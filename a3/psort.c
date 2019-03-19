@@ -12,7 +12,7 @@ void print_structs(struct rec* rec_array, int n){
 		printf("word : %s freq : %i\n", rec_array[i].word, rec_array[i].freq);
 	}
 }
-
+	
 void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 
 	int pipe_fd[N][2];
@@ -20,7 +20,10 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 	for (int i = 0; i < N; i++){
 	
 		//Pipe before fork
-		pipe(pipe_fd[i]);
+		if(pipe(pipe_fd[i]) == -1){
+			perror("pipe initialize error");
+			exit(1);
+		}
 	
 		int ret = fork();
 	
@@ -30,19 +33,28 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 		}else if (ret == 0){
 			//Should close previous pipe reading ends
 			for (int j = 0; j < i; j++){
-				close(pipe_fd[j][0]);
+				if(close(pipe_fd[j][0]) == -1){
+					perror("close read from child");
+				exit(1);
+			}
 			}
 			//Should close current pipe reading end
-			close(pipe_fd[i][0]); 
+			if(close(pipe_fd[i][0]) == -1){
+				perror("close read from child");
+				exit(1);
+			}
 			
 			//Allocate memory to temporarily store structs for sorting
 			struct rec *temp_recs = malloc(sizeof(struct rec) * child_sizes[i]);
-			
+			if (temp_recs == NULL){
+				fprintf(stderr, "malloc error");
+				exit(1);
+			}
 			//Open file pointer in child
 			FILE* infp;
 			if ((infp = fopen(infile, "rb")) == NULL) {
         		fprintf(stderr, "Could not open %s\n", infile);
-        	exit(1);
+        		exit(1);
     		}
     		
 			//Each child will read in 1/N of the file and use qsort to sort it
@@ -51,27 +63,47 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 				offset_sum += child_sizes[k];
 			}
 			fseek(infp, sizeof(struct rec)*offset_sum, SEEK_SET);	
-			fread(temp_recs, sizeof(struct rec), child_sizes[i], infp); 
+			if(fread(temp_recs, sizeof(struct rec), child_sizes[i], infp) != child_sizes[i]){
+				fprintf(stderr, "fread error");
+				exit(1);
+			}
 			qsort(temp_recs, child_sizes[i], sizeof(struct rec), compare_freq); 
 			
 			
 			//After sorting each child will write each record to the pipe
-			write(pipe_fd[i][1], temp_recs, sizeof(struct rec) * child_sizes[i]); 
-			close(pipe_fd[i][1]);
+			if(write(pipe_fd[i][1], temp_recs, sizeof(struct rec) * child_sizes[i]) == -1){
+				perror("write to pipe from child");
+				exit(1);
+			} 
+			
+			if(close(pipe_fd[i][1]) == -1){
+				perror("close write from child");
+				exit(1);
+			}
 			
 			//Free Memory
 			free(temp_recs); 
-			fclose(infp);
+			
+			if (fclose(infp) != 0){
+				perror("input file close error in child");
+				exit(1);
+			}
 			exit(0); 
 		
 		}else{
 			//Close writing end in parent
-			close(pipe_fd[i][1]); 
+			if(close(pipe_fd[i][1]) == -1){
+				perror("close write from parent");
+				exit(1);
+			}
 		}
 	}
 	//Parent will merge the data from each of the children and write to output file
 	merge(pipe_fd, N, outfp);
-	fclose(outfp); 
+	if (fclose(outfp) != 0){
+		perror("output file close error");
+		exit(1);
+	}
 }
 
 
@@ -128,8 +160,6 @@ int main(int argc, char** argv){
     if (divide_even(child_sizes, N, file_size) == 1){
     	exit(0); 
 	}
-	printf("%i\n",child_sizes[0]);
-	printf("%i\n",child_sizes[N-1]);
 	
 	process_sort(N, child_sizes, infile, outfp);
 	return 0;

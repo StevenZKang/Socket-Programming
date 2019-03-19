@@ -40,10 +40,7 @@ int divide_even(int * child_sizes, int N, int file_size){
 		return 1;
 	}
 	int q = file_size/N;
-	printf("%i\n", q);
 	int r = file_size % N; 
-	printf("%i\n", r);
-	//memset(child_sizes, q, N);
 	//Increment the first r elements by 1
 	for (int i = 0; i < N; i++){
 		child_sizes[i] = q;
@@ -55,6 +52,7 @@ int divide_even(int * child_sizes, int N, int file_size){
 	return 0; 
 }
 
+//Merging array of pipes into file helper
 void merge(int pipe_fd[][2],int N, FILE *outfp){
 	
 	struct rec first_layer[N];
@@ -62,9 +60,11 @@ void merge(int pipe_fd[][2],int N, FILE *outfp){
 	
 	//Fill first_layer from reading end of pipes
 	for(int j = 0; j < N; j++){
-		read(pipe_fd[j][0], &first_layer[j], sizeof(struct rec));
+		if(read(pipe_fd[j][0], &first_layer[j], sizeof(struct rec)) == -1){
+			perror("parent pipe read error");
+			exit(1);
+		}
 	}
-	
 	
     while(1){
 		smallest = 0;
@@ -80,7 +80,9 @@ void merge(int pipe_fd[][2],int N, FILE *outfp){
 			break; 
 		}
 		
-		fwrite(&first_layer[smallest], sizeof(struct rec), 1, outfp);
+		if(fwrite(&first_layer[smallest], sizeof(struct rec), 1, outfp) != 1){
+			fprintf(stderr, "fwrite error"); 
+		}
 		printf("word : %s freq : %i\n", first_layer[smallest].word, first_layer[smallest].freq);
 		//If there is no more recs in the pipe to read, set that index's rec to EMPTY
 		if (read(pipe_fd[smallest][0], &first_layer[smallest], sizeof(struct rec)) == 0){
