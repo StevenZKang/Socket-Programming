@@ -6,13 +6,6 @@
 #include <time.h>
 #include "helper.h"
 
-void print_structs(struct rec* rec_array, int n){
-	
-	for(int i = 0; i<n;i++){
-		printf("word : %s freq : %i\n", rec_array[i].word, rec_array[i].freq);
-	}
-}
-	
 void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 
 	int pipe_fd[N][2];
@@ -100,6 +93,12 @@ void process_sort(int N, int *child_sizes, char *infile, FILE *outfp){
 	}
 	//Parent will merge the data from each of the children and write to output file
 	merge(pipe_fd, N, outfp);
+	for(int m = 0; m < N; m++){
+		if(close(pipe_fd[m][0]) == -1){
+			perror("close pipe from parent");
+			exit(1);
+		}
+	}
 	if (fclose(outfp) != 0){
 		perror("output file close error");
 		exit(1);
