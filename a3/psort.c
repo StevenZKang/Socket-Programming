@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <sys/wait.h>
 #include "helper.h"
 
 void process_sort(int N, int *child_sizes, char *infile, char* outfile){
@@ -100,12 +101,20 @@ void process_sort(int N, int *child_sizes, char *infile, char* outfile){
     
     //Parent will merge the data from each of the children and write to output file
 	merge(pipe_fd, N, outfp);
+	int status;
 	for(int m = 0; m < N; m++){
 		if(close(pipe_fd[m][0]) == -1){
 			perror("close pipe from parent");
 			exit(1);
 		}
+		wait(&status);
+		if(status != 0){
+			fprintf(stderr, "Child terminated abnormally\n");
+		}
 	}
+    //Parent will wait to check that child processes exited properly 
+	
+	
 	if (fclose(outfp) != 0){
 		perror("output file close error");
 		exit(1);
