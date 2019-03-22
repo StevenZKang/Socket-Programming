@@ -71,7 +71,7 @@ int main() {
 
             }
             // Step 5: update after and room, in preparation for the next read.
-	    room = BUFSIZE - (1 + inbuf);
+	    room = BUFSIZE - (inbuf);
 	    after = &buf[inbuf]; 
 
         }
