@@ -9,7 +9,7 @@
 
 
 #ifndef PORT
-  #define PORT 30000
+  #define PORT 52025
 #endif
 #define MAX_BACKLOG 5
 #define MAX_CONNECTIONS 12
@@ -18,7 +18,7 @@
 
 struct sockname {
     int sock_fd;
-    char *username;
+    char username[BUF_SIZE + 1];
 };
 
 
@@ -46,7 +46,9 @@ int accept_connection(int fd, struct sockname *usernames) {
     }
 
     usernames[user_index].sock_fd = client_fd;
-    usernames[user_index].username = NULL;
+    int num_name = read(client_fd, usernames[user_index].username, BUF_SIZE);
+    (usernames[user_index].username)[num_name] = '\0';
+    
     return client_fd;
 }
 
@@ -55,16 +57,28 @@ int accept_connection(int fd, struct sockname *usernames) {
  * Return the fd if it has been closed or 0 otherwise.
  */
 int read_from(int client_index, struct sockname *usernames) {
+	
     int fd = usernames[client_index].sock_fd;
     char buf[BUF_SIZE + 1];
 
     int num_read = read(fd, &buf, BUF_SIZE);
     buf[num_read] = '\0';
-    if (num_read == 0 || write(fd, buf, strlen(buf)) != strlen(buf)) {
-        usernames[client_index].sock_fd = -1;
-        return fd;
+    
+    char buf2[strlen(usernames[client_index].username) + num_read + 2];
+    strcpy(buf2, usernames[client_index].username);
+    strcat(buf2, ":");
+    strcat(buf2, buf);
+	
+	if (num_read == 0 || write(fd, buf2, strlen(buf2)) != strlen(buf2)) {
+        		usernames[client_index].sock_fd = -1;
+        		return fd;
     }
-
+    
+	for (int index = 0; index < MAX_CONNECTIONS; index++) {
+        if (usernames[index].sock_fd > -1 && usernames[index].sock_fd != fd){
+        	write(usernames[index].sock_fd, buf2, strlen(buf2));
+		}	
+	}
     return 0;
 }
 
@@ -73,7 +87,7 @@ int main(void) {
     struct sockname usernames[MAX_CONNECTIONS];
     for (int index = 0; index < MAX_CONNECTIONS; index++) {
         usernames[index].sock_fd = -1;
-        usernames[index].username = NULL;
+        //usernames[index].username = NULL;
     }
 
     // Create the socket FD.
@@ -124,6 +138,7 @@ int main(void) {
         }
 
         // Is it the original socket? Create a new connection ...
+        // original sock_fd is only ready when there is a new connection 
         if (FD_ISSET(sock_fd, &listen_fds)) {
             int client_fd = accept_connection(sock_fd, usernames);
             if (client_fd > max_fd) {
