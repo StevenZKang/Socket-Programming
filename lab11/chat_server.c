@@ -44,10 +44,11 @@ int accept_connection(int fd, struct sockname *usernames) {
         close(fd);
         exit(1);
     }
+    printf("Accepted connection\n");
 
     usernames[user_index].sock_fd = client_fd;
     int num_name = read(client_fd, usernames[user_index].username, BUF_SIZE);
-    (usernames[user_index].username)[num_name] = '\0';
+    (usernames[user_index].username)[num_name-1] = '\0';
     
     return client_fd;
 }
@@ -69,16 +70,18 @@ int read_from(int client_index, struct sockname *usernames) {
     strcat(buf2, ":");
     strcat(buf2, buf);
 	
-	if (num_read == 0 || write(fd, buf2, strlen(buf2)) != strlen(buf2)) {
-        		usernames[client_index].sock_fd = -1;
-        		return fd;
+   if (num_read == 0 || write(fd, buf2, strlen(buf2)) != strlen(buf2)) {
+        	usernames[client_index].sock_fd = -1;
+        	return fd;
     }
     
-	for (int index = 0; index < MAX_CONNECTIONS; index++) {
+    for (int index = 0; index < MAX_CONNECTIONS; index++) {
         if (usernames[index].sock_fd > -1 && usernames[index].sock_fd != fd){
-        	write(usernames[index].sock_fd, buf2, strlen(buf2));
+        	if ( (write(usernames[index].sock_fd, buf2, strlen(buf2)) ) != strlen(buf2)){
+			usernames[index].sock_fd = -1;
 		}	
 	}
+    }
     return 0;
 }
 
@@ -145,7 +148,7 @@ int main(void) {
                 max_fd = client_fd;
             }
             FD_SET(client_fd, &all_fds);
-            printf("Accepted connection\n");
+            
         }
 
         // Next, check the clients.

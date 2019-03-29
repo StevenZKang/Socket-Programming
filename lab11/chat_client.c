@@ -37,7 +37,7 @@ int main(void) {
         exit(1);
     }
 	
-	printf("Please enter an Username");
+    printf("Please enter an Username\n");
     // Read input from the user, send it to the server, and then accept the
     // echo that returns. Exit when stdin is closed.
     int max_fd = sock_fd;
@@ -58,7 +58,7 @@ int main(void) {
             exit(1);
         }
     	
-    	if (FD_ISSET(sock_fd, &ready_fds)) {
+    	if (FD_ISSET(STDIN_FILENO, &ready_fds)) {
     		int num_read = read(STDIN_FILENO, buf, BUF_SIZE);
         	if (num_read == 0) {
             	break;
@@ -75,9 +75,12 @@ int main(void) {
                
         
 		
-		if (FD_ISSET(STDIN_FILENO, &ready_fds)) {
+	if (FD_ISSET(sock_fd, &ready_fds)) {
 	        int num_read2 = read(sock_fd, buf, BUF_SIZE);
 	        buf[num_read2] = '\0';
+		if (num_read2 == 0) {
+            		break;
+        	}
 	        printf("Received from server: %s", buf);
     	}
     }
