@@ -75,6 +75,13 @@ void init_game(struct game_state *game, char *dict_name) {
 
 }
 
+/* Checks if letter guessed is inside the hidden word and updates 
+ * the game accordingly. Returns 0 if guess is valid and 1 if  guess is invalid.
+ */
+int player_guess(struct game_state *game, char letter){
+	
+}
+
 
 /* Return the number of lines in the file
  */
