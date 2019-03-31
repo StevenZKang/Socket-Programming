@@ -10,6 +10,7 @@
 #define YOUR_TURN "Your guess? "
 #define NOT_YOUR_TURN "It is not your turn to guess."
 #define YOU_WIN "Game over! You win!"
+#define INVALID_GUESS "Invalid Guess. Please enter a new lower case letter."
 
 struct client {
     int fd;

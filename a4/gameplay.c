@@ -76,10 +76,22 @@ void init_game(struct game_state *game, char *dict_name) {
 }
 
 /* Checks if letter guessed is inside the hidden word and updates 
- * the game accordingly. Returns 0 if guess is valid and 1 if  guess is invalid.
+ * the game accordingly. 
+ * Returns 1 if guess is valid and 0 if  guess is invalid.
  */
 int player_guess(struct game_state *game, char letter){
-	
+	//Check if letter is inside hidden word
+	int i = 0; 
+	int correct = 0;
+	while(game.word[i]){
+		if (game.word[i] == letter){
+			game.guess[i] = letter; 
+			game.letters_guessed[letter - 'a'] = 1; 
+			correct = 1;
+		}
+	}
+	game.guesses_left -= 1;
+	return correct; 
 }
 
 
