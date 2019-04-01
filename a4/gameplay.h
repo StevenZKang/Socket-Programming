@@ -7,7 +7,8 @@
 #define MAX_GUESSES 4
 #define NUM_LETTERS 26
 #define WELCOME_MSG "Welcome to our word game. What is your name? "
-#define YOUR_TURN "Your guess? "
+#define INVALID_NAME "Invalid Name. Please enter a new name." 
+#define YOUR_TURN "Your guess?"
 #define NOT_YOUR_TURN "It is not your turn to guess."
 #define YOU_WIN "Game over! You win!"
 #define INVALID_GUESS "Invalid Guess. Please enter a new lower case letter."
@@ -45,4 +46,5 @@ int get_file_length(char *filename);
 char *status_message(char *msg, struct game_state *game);
 
 int player_guess(struct game_state *game, char letter);
+int unique_name(struct client *p, char *name);
 

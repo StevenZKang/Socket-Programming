@@ -83,17 +83,29 @@ int player_guess(struct game_state *game, char letter){
 	//Check if letter is inside hidden word
 	int i = 0; 
 	int correct = 0;
-	while(game.word[i]){
-		if (game.word[i] == letter){
-			game.guess[i] = letter; 
-			game.letters_guessed[letter - 'a'] = 1; 
+	while(game->word[i]){
+		if (game->word[i] == letter){
+			game->guess[i] = letter; 
+			game->letters_guessed[letter - 'a'] = 1; 
 			correct = 1;
 		}
+		i++;
 	}
-	game.guesses_left -= 1;
+	game->guesses_left -= 1;
 	return correct; 
 }
 
+/* Checks if entered name is already taken. 
+ * Returns 1 if name is untaken and 0 if it is already taken.
+ */
+int unique_name(struct client *head, char *name){
+	for (struct client *p = head; p != NULL; p = p->next){
+		if (strcmp(p->name, name) == 0){
+			return 0;
+		}
+	}
+	return 1; 
+}
 
 /* Return the number of lines in the file
  */

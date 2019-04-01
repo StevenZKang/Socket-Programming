@@ -20,19 +20,28 @@
 #endif
 #define MAX_QUEUE 5
 
-
+int write_to_client(int *client_fd, char * msg);
 void add_player(struct client **top, int fd, struct in_addr addr);
 void remove_player(struct client **top, int fd);
-void broadcast(struct game_state *game, char *outbuf);
+void activate_player(struct game_state *game, struct client **top, struct client *p);
+void broadcast(struct game_state *game, char *outbuf, int exception_fd);
 void announce_turn(struct game_state *game);
 void announce_winner(struct game_state *game, struct client *winner);
+void announce_join(struct game_state *game, struct client *p);
+void announce_goodbye(struct game_state *game, char *name);
 void advance_turn(struct game_state *game);
+void clean_list(struct client **top);
+int find_network_newline(const char *buf, int n);
 
 /*Attempt to write msg to client fd. 
  *If write falls then set client_fd to -1 and return client fd, else return 0
 */
 int write_to_client(int *client_fd, char * msg){
-	if (write(*client_fd, msg, strlen(msg)) != strlen(msg)){
+	char network_msg[strlen(msg) + 2];
+	strcpy(network_msg,msg); 
+	strcat(network_msg, "\r\n");
+
+	if (write(*client_fd, network_msg, strlen(network_msg)) != strlen(network_msg)){
 		*client_fd = -1; 
 		return *client_fd; 
 	}
@@ -41,31 +50,51 @@ int write_to_client(int *client_fd, char * msg){
 
 /* Send the message in outbuf to all clients */
 void broadcast(struct game_state *game, char *outbuf, int exception_fd){
-	for(p = game.head; p != NULL; p = p->next){
-		if(p->fd != exception_fd && p-> != -1){
+	
+	for(struct client *p = game->head; p != NULL; p = p->next){
+		if(p->fd != exception_fd && p->fd != -1){
 			if (write_to_client(&(p->fd), outbuf) != 0){
-				annouce_goodbye(game, p->name);
+				announce_goodbye(game, p->name);
 			}
 		}
 	}
 }
 
+void announce_join(struct game_state *game, struct client *p){
+	//Broadcast new player has joined
+	char join_msg[strlen(p->name) + 15];
+	strcpy(join_msg, p->name);
+	strcat(join_msg, " has joined.");
+	broadcast(game, join_msg, -1); 
+	//Write game status to new player 
+	char status_msg[MAX_MSG];
+	if (write_to_client(&(p->fd), status_message(status_msg, game)) != 0){
+		announce_goodbye(game, p->name);
+	}
+	char turn_msg[16 + strlen(game->has_next_turn->name)];
+	strcpy(turn_msg, "It's ");
+	strcat(turn_msg, game->has_next_turn->name);
+	strcat(turn_msg, "'s turn.");
+	if (write_to_client(&(p->fd), turn_msg) != 0){
+		announce_goodbye(game, p->name);
+	}
+}
 
-void annouce_goodbye(struct game_state *game, char *name){
-	char goodbye[9 + len(name)];
+void announce_goodbye(struct game_state *game, char *name){
+	char goodbye[9 + strlen(name)];
 	strcpy(goodbye, "Goodbye ");
 	strcat(goodbye, name); 
 	broadcast(game, goodbye, -1); 
 }
 
-void annouce_turn(struct game_state *game){
-	for(p = game.head; p != NULL; p = p->next){
-		if(p == game.has_next_turn){
+void announce_turn(struct game_state *game){
+	for(struct client *p = game->head; p != NULL; p = p->next){
+		if(p == game->has_next_turn){
 			if (write_to_client(&(p->fd), YOUR_TURN) != 0){
 				advance_turn(game);
-				annouce_goodbye(game, p); 
+				announce_goodbye(game, p->name); 
 			} else{
-				char turn_msg[14 + len(p->name)];
+				char turn_msg[14 + strlen(p->name)];
 				strcpy(turn_msg, "It's ");
 				strcat(turn_msg, p->name);
 				strcat(turn_msg, "'s turn.");
@@ -75,10 +104,10 @@ void annouce_turn(struct game_state *game){
 	}
 }
 
-void annouce_winner(struct game_state *game, struct client *p){
+void announce_winner(struct game_state *game, struct client *p){
 	
 		if (write_to_client(&(p->fd), YOU_WIN) != 0){
-			annouce_goodbye(game, p);
+			announce_goodbye(game, p->name);
 		}
 		char loser_msg[18 + strlen(p->name)];
 		strcpy(loser_msg, "Game Over! ");
@@ -89,7 +118,12 @@ void annouce_winner(struct game_state *game, struct client *p){
 
 /* Move the has_next_turn pointer to the next active client */
 void advance_turn(struct game_state *game){
-	game.has_next_turn = game.has_next_turn.next; 
+	
+	if(game->has_next_turn->next == NULL){
+		game->has_next_turn = game->head; 
+	}else{
+		game->has_next_turn = game->has_next_turn->next; 
+	}
 }
 
 
@@ -147,21 +181,29 @@ void remove_player(struct client **top, int fd) {
 /* Removes client from the new_players list and adds client to the
  * head of the active players list. 
  */
-void activate_player(){
-//Add new player to head of in game list
- //If current game list is empty 
-    if (game.head == NULL){
-        game.has_next_turn = p; 
-	}
-    p->next = game.head; 
-    game.head = p; 
-	//Need to remove p from new_players list!?!?!	
+void activate_player(struct game_state *game, struct client **top, struct client *p){
 	
+	//Remove p from new_players list
+	if (*top == p){
+		*top = p->next; 
+	}else{
+		struct client *curr; 	
+		for (curr = *top; curr->next != p ; curr = curr->next);
+		curr->next = p->next; 
+	}
+	//Add p to head of active list
+ 	//If current game list is empty 
+    if (game->head == NULL){
+        game->has_next_turn = p; 
+	}
+    p->next = game->head; 
+    game->head = p;	
 }
 
 
-void clean_lists(struct client **top){
-	for (p = *top; p != NULL; p = p->next){
+void clean_list(struct client **top){
+	
+	for (struct client * p = *top; p != NULL; p = p->next){
 		if(p->fd == -1){
 			printf("Disconnect from %s\n", inet_ntoa(p->ipaddr)); 
 			remove_player(top, p->fd); 
@@ -266,8 +308,13 @@ int main(int argc, char **argv) {
                         //*******HANDLE PLAYER TURN*************
                         if(p == game.has_next_turn){
                         		//Read in from fd. 
-                        		if( (nbytes = read(p->fd, letter_guess, MAX_BUF)) <= 0){
+                        		if( (nbytes = read(p->fd, &letter_guess[inbuf], MAX_BUF)) <= 0){
                         				p->fd = -1; 
+										announce_goodbye(&game, p->name);
+										advance_turn(&game);
+										announce_turn(&game);
+										break; 
+										
 								}
 								inbuf += nbytes; 		
 								//Check if \r\n has been found then handle input. 
@@ -275,49 +322,63 @@ int main(int argc, char **argv) {
 									letter_guess[end] = '\0';
 									
 									//Check if input is valid
-		                        	if (strlen(letter_guess) != 1 || letter_guess[0] < 'a' || letter_guess[0] > 'z' || game.letters_guessed[letter_guess[0]] == 1){
+		                        	if (strlen(letter_guess) != 1 || letter_guess[0] < 'a' || letter_guess[0] > 'z' || game.letters_guessed[letter_guess[0] - 'a'] == 1){
 		                        		//INVALID GUESS
 		                        		if(write_to_client(&(p->fd), INVALID_GUESS) != 0){
-		                        			annouce_goodbye(game, p->name);
+		                        			announce_goodbye(&game, p->name);
+											advance_turn(&game);
+											announce_turn(&game);
+											break;  
 										}
 									}else{
 										//VALID GUESS
-										advance_turn(game); 
-										if(player_guess(game, letter_guess[0]) == 0){
+										advance_turn(&game); 
+										char * won; 
+										if(player_guess(&game, letter_guess[0]) == 0){
 											//Missed Guess
 											char miss_msg[21];
 											strcpy(miss_msg, letter_guess);
-											strcat(miss_msg, " is not in the word"); 
+											strcat(miss_msg, " is not in the word\r\n"); 
 											if (write_to_client(&(p->fd), miss_msg) != 0){
-												annouce_goodbye(game, p->name);
+												announce_goodbye(&game, p->name);
 											}
 										}else{
 											//Correct Guess, check for winner
-											if (int won = is_winner()){
-												broadcast(game, game.word, -1); 
-												annouce_winner(game, p);
-												//RESET GAME
+											won = strchr(game.guess, '-');
+											if (won == NULL){
+												broadcast(&game, game.word, -1); 
+												announce_winner(&game, p);
+												init_game(&game, argv[1]);
 											}
 										}
 										
-										if(!won && game.guesses_left == 0){
-											broadcast(game, game.word, -1); 
-											//RESET GAME
+										if(won != NULL && game.guesses_left == 0){
+											broadcast(&game, game.word, -1); 
+											init_game(&game, argv[1]);
 										}
 										
+										//Broadcast new status message		
+										if(won != NULL && game.guesses_left > 0){
+											char status_msg[MAX_MSG];
+											broadcast(&game, status_message(status_msg, &game), -1); 
+										}
+										announce_turn(&game); 
+
 									}
 									
-									//RESET THE BUFFER VARIABLES
-									char letter_guess[MAX_BUF];
+									//RESET THE BUFFER VARIABLE
 								    inbuf = 0;
 								}
                         		
 	                        	
 							
                         	
-                        //If it is not their turn, tell them its not their turn
+                        //If it is not their turn, clear their buffer tell them its not their turn
 						}else{
-							write_to_client(&(p->fd), NOT_YOUR_TURN);	
+							read(p->fd, p->inbuf, MAX_BUF);
+							if(write_to_client(&(p->fd), NOT_YOUR_TURN) != 0){
+								announce_goodbye(&game, p->name);
+							}	
 						}
                         
                         
@@ -330,25 +391,38 @@ int main(int argc, char **argv) {
                     if(cur_fd == p->fd) {
                         // TODO - handle input from an new client who has
                         // not entered an acceptable name.
-                        if( (namebytes = read(p->fd, name_buf, MAX_BUF)) <= 0){
-                        				p->fd = -1; 
-								}
-						name_inbuf += namebytes; 		
+						int namebytes;
+                        if( (namebytes = read(p->fd, p->in_ptr, MAX_BUF)) <= 0){
+                        		remove_player(&new_players, p->fd); 
+								break; 
+						}
+						p->in_ptr += namebytes; 		
 						//Check if \r\n has been found then handle input. 
-						if ((name_end = find_network_newline(name_buf, name_inbuf)) != -1 && p->fd != 0){
-								name_buf[name_end] = '\0';
-								//Check for valid name and 
+						int name_end; 
+						if ((name_end = find_network_newline(p->inbuf, p->in_ptr - p->inbuf)) != -1 && p->fd != 0){
+								p->inbuf[name_end] = '\0';
+								//Check for valid name 
+								if (strlen(p->inbuf) > 1 && unique_name(game.head, p->inbuf)){
+									strcpy(p->name, p->inbuf); 
+									activate_player(&game, &new_players, p);
+									announce_join(&game, p); 
+								}else{
+									if (write_to_client(&(p->fd), INVALID_NAME) != 0){
+										remove_player(&new_players, p->fd); 
+										break;
+									}  
+								}
+								p->in_ptr = p->inbuf; 
 						}
                         
                         break;
                     } 
                 }
-            }
+           	 }
         }
         //Remove all clients with -1 fd.
-        clean_list(&game.head);
+        clean_list(&(game.head));
         //Announce who's turn it is.
-        annouce_turn(game);
     }
     return 0;
 }
