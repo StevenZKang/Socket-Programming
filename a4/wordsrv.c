@@ -43,10 +43,10 @@ int find_network_newline(const char *buf, int n);
  *If write falls then set client_fd to -1 and return client fd, else return 0
 */
 int write_to_client(struct client *p, char * msg){
-	char network_msg[strlen(msg) + 2];
+	char network_msg[strlen(msg) + 3];
 	strcpy(network_msg,msg); 
 	strcat(network_msg, "\r\n");
-
+	
 	if (write(p->fd, network_msg, strlen(network_msg)) != strlen(network_msg)){
 		printf("Disconnect from %s\n", inet_ntoa(p->ipaddr));
 		printf("Removing client %d %s\n", p->fd, inet_ntoa(p->ipaddr));
@@ -150,7 +150,7 @@ void announce_guess(struct game_state *game, char *name, const char *guess, int 
 
 /* Move the has_next_turn pointer to the next active client */
 void advance_turn(struct game_state *game){
-	
+	printf("Changing Turn"); 
 	if(game->has_next_turn->next == NULL){
 		game->has_next_turn = game->head; 
 	}else{
@@ -317,8 +317,6 @@ int main(int argc, char **argv) {
     maxfd = listenfd;
     
     //Input buffering variables
-	char letter_guess[MAX_BUF];
-    int inbuf = 0;
     int nbytes = 0;
    	int end;
    	
@@ -363,78 +361,75 @@ int main(int argc, char **argv) {
                 
                 for(p = game.head; p != NULL; p = p->next) {
                     if(cur_fd == p->fd) {
-                        //TODO - handle input from an active client
                         
-                        //*******HANDLE PLAYER TURN*************
-                        if(p == game.has_next_turn){
-                        		//Read in from fd. 
-                        		if( (nbytes = read(p->fd, &letter_guess[inbuf], MAX_BUF)) <= 0){
-										printf("Disconnect from %s\n", inet_ntoa(p->ipaddr));
-										printf("Removing client %d %s\n", p->fd, inet_ntoa(p->ipaddr));
-                        				p->fd = -1; 
-										announce_goodbye(&game, p->name);
-										advance_turn(&game);
-										announce_turn(&game);
-										break; 
-								}
-								printf("[%i] Read %i bytes\n", p->fd, nbytes);
-								inbuf += nbytes; 		
-								//If \r\n has been found then handle input. 
-								if ((end = find_network_newline(letter_guess, inbuf)) != -1 && p->fd != 0){
-									letter_guess[end] = '\0';
-									printf("[%i] Found newline %s\n", p->fd, letter_guess);
-									//Invalid Input 
-		                        	if (strlen(letter_guess) != 1 || letter_guess[0] < 'a' || letter_guess[0] > 'z' || game.letters_guessed[letter_guess[0] - 'a'] == 1){
-		                        		if(write_to_client(p, INVALID_GUESS) != 0){
-		                        			announce_goodbye(&game, p->name);
-											advance_turn(&game);
-											announce_turn(&game);
-											break;  
-										}
-									//Valid Input
-									}else{
-										advance_turn(&game); 
-										//Incorrect Guess.
-										if(player_guess(&game, letter_guess[0]) == 0){
-											printf("Letter %c is not in the word\n", letter_guess[0]);
-											char miss_msg[21];
-											strcpy(miss_msg, letter_guess);
-											strcat(miss_msg, " is not in the word\n"); 
-											if (write_to_client(p, miss_msg) != 0){
-												announce_goodbye(&game, p->name);
-											}
-										}
-										//Broadcast guess. 
-										announce_guess(&game, p->name, letter_guess, p->fd); 
-										//If game is over init a new game.
-										if (is_gameover(&game, p)){
-											printf("New Game\n");
-											broadcast(&game, NEW_GAME, -1); 
-											init_game(&game, argv[1]);
-										} 
-										//Broadcast new status message and player turn. 	
-										char status_msg[MAX_MSG];
-										broadcast(&game, status_message(status_msg, &game), -1); 
-										announce_turn(&game); 
-									}
-									//RESET THE BUFFER VARIABLE
-								    inbuf = 0;
-									break; 
-								}
-                        		
-                        //If it is not their turn, clear their buffer tell them its not their turn
-						}else{
-							read(p->fd, p->inbuf, MAX_BUF);
-							if(write_to_client(p, NOT_YOUR_TURN) != 0){
+                        
+                        //TODO - handle input from an active client
+						if( (nbytes = read(p->fd, p->in_ptr, MAX_BUF)) <= 0){
+								printf("Disconnect from %s\n", inet_ntoa(p->ipaddr));
+								printf("Removing client %d %s\n", p->fd, inet_ntoa(p->ipaddr));
+                        		p->fd = -1; 
 								announce_goodbye(&game, p->name);
-								break;
-							}
-							
+								break; 
 						}
+						printf("[%i] Read %i bytes\n", p->fd, nbytes);
+						p->in_ptr += nbytes;
 
+						
+						//If \r\n has been found then handle input. 
+						if ((end = find_network_newline(p->inbuf, p->in_ptr - p->inbuf)) != -1 && p->fd != 0){
+								p->inbuf[end] = '\0';
+								printf("[%i] Found newline %s\n", p->fd, p->inbuf);	
+
+							//Handle Player Turn
+		                    if(p == game.has_next_turn){
+										//Invalid Input 
+				                    	if (strlen(p->inbuf) != 1 || p->inbuf[0] < 'a' || p->inbuf[0] > 'z' || game.letters_guessed[p->inbuf[0] - 'a'] == 1){
+				                    		if(write_to_client(p, INVALID_GUESS) != 0){
+				                    			announce_goodbye(&game, p->name);
+												advance_turn(&game);
+												announce_turn(&game);
+												break;  
+											}
+										//Valid Input
+										}else{
+											advance_turn(&game); 
+											//Incorrect Guess.
+											if(player_guess(&game, p->inbuf[0]) == 0){
+												printf("Letter %c is not in the word\n", p->inbuf[0]);
+												char miss_msg[21];
+												strcpy(miss_msg, p->inbuf);
+												strcat(miss_msg, " is not in the word\n"); 
+												if (write_to_client(p, miss_msg) != 0){
+													announce_goodbye(&game, p->name);
+												}
+											}
+											//Broadcast guess. 
+											announce_guess(&game, p->name, p->inbuf, p->fd); 
+											//If game is over init a new game.
+											if (is_gameover(&game, p)){
+												printf("New Game\n");
+												broadcast(&game, NEW_GAME, -1); 
+												init_game(&game, argv[1]);
+											} 
+											//Broadcast new status message and player turn. 	
+											char status_msg[MAX_MSG];
+											broadcast(&game, status_message(status_msg, &game), -1); 
+											announce_turn(&game); 
+										}
+		                    //If it is not their turn, clear their buffer tell them its not their turn
+							}else{
+								if(write_to_client(p, NOT_YOUR_TURN) != 0){
+									announce_goodbye(&game, p->name);
+									break;
+								}
+							}
+						//RESET THE BUFFER VARIABLE
+						p->in_ptr = p->inbuf; 
+					 }//End of input handling
+					
                     }
                 }//End of active player handling block. 
-        
+        		
                 // Check if any new players are entering their names
                 for(p = new_players; p != NULL; p = p->next) {
                     if(cur_fd == p->fd) {
@@ -470,7 +465,7 @@ int main(int argc, char **argv) {
                         
                         break;
                     } 
-                }
+                } 
            	 }
         }
         //Remove all clients with -1 fd.
