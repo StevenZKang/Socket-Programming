@@ -102,6 +102,8 @@ void announce_turn(struct game_state *game){
 			}
 		}
 	}
+	//Prompt server
+	printf("It's %s's turn", game->has_next_turn->name);
 }
 
 void announce_winner(struct game_state *game, struct client *p){
@@ -109,8 +111,10 @@ void announce_winner(struct game_state *game, struct client *p){
 		if (write_to_client(&(p->fd), YOU_WIN) != 0){
 			announce_goodbye(game, p->name);
 		}
-		char loser_msg[18 + strlen(p->name)];
-		strcpy(loser_msg, "Game Over! ");
+		char loser_msg[31 + strlen(p->name) + strlen(game->word)];
+		strcpy(loser_msg, "The word was ");
+		strcat(loser_msg, game->word); 
+		strcat(loser_msg, ".\nGame Over! ");
 		strcat(loser_msg, p->name);
 		strcat(loser_msg, " wins!");
 		broadcast(game, loser_msg, p->fd); 
@@ -316,11 +320,12 @@ int main(int argc, char **argv) {
 										break; 
 										
 								}
+								printf("[%i] Read %i bytes", p->fd, nbytes);
 								inbuf += nbytes; 		
 								//Check if \r\n has been found then handle input. 
 								if ((end = find_network_newline(letter_guess, inbuf)) != -1 && p->fd != 0){
 									letter_guess[end] = '\0';
-									
+									printf("[%i] Found newline %s", p->fd, letter_guess);
 									//Check if input is valid
 		                        	if (strlen(letter_guess) != 1 || letter_guess[0] < 'a' || letter_guess[0] > 'z' || game.letters_guessed[letter_guess[0] - 'a'] == 1){
 		                        		//INVALID GUESS
@@ -336,6 +341,7 @@ int main(int argc, char **argv) {
 										char * won; 
 										if(player_guess(&game, letter_guess[0]) == 0){
 											//Missed Guess
+											printf("Letter %c is not in the word", letter_guess[0]);
 											char miss_msg[21];
 											strcpy(miss_msg, letter_guess);
 											strcat(miss_msg, " is not in the word\r\n"); 
@@ -349,16 +355,20 @@ int main(int argc, char **argv) {
 												broadcast(&game, game.word, -1); 
 												announce_winner(&game, p);
 												init_game(&game, argv[1]);
+												break; 
 											}
 										}
 										
-										if(won != NULL && game.guesses_left == 0){
-											broadcast(&game, game.word, -1); 
+										//Check if players have lost 
+										if(game.guesses_left == 0){
+											char answer_msg[31 + strlen(game.word)];
+											strcpy(answer_msg, "No more guesses. The word was ");
+											strcat(answer_msg, game.word);
+											broadcast(&game, answer_msg, -1); 
 											init_game(&game, argv[1]);
 										}
-										
-										//Broadcast new status message		
-										if(won != NULL && game.guesses_left > 0){
+										//Game is not over, Broadcast new status message 	
+										else{
 											char status_msg[MAX_MSG];
 											broadcast(&game, status_message(status_msg, &game), -1); 
 										}
@@ -396,11 +406,13 @@ int main(int argc, char **argv) {
                         		remove_player(&new_players, p->fd); 
 								break; 
 						}
+						printf("[%i] Read %i bytes", p->fd, namebytes);
 						p->in_ptr += namebytes; 		
 						//Check if \r\n has been found then handle input. 
 						int name_end; 
 						if ((name_end = find_network_newline(p->inbuf, p->in_ptr - p->inbuf)) != -1 && p->fd != 0){
 								p->inbuf[name_end] = '\0';
+								printf("[%i] Found newline %s", p->fd, p->inbuf); 
 								//Check for valid name 
 								if (strlen(p->inbuf) > 1 && unique_name(game.head, p->inbuf)){
 									strcpy(p->name, p->inbuf); 
@@ -422,7 +434,6 @@ int main(int argc, char **argv) {
         }
         //Remove all clients with -1 fd.
         clean_list(&(game.head));
-        //Announce who's turn it is.
     }
     return 0;
 }
@@ -435,6 +446,7 @@ int main(int argc, char **argv) {
 int find_network_newline(const char *buf, int n) {
     for (int i = 0; i < n; i++){
 	if(buf[i] == '\r' && buf[i+1] == '\n'){
+		//Annouce found newline to server
 		return i; 
 	}   
     }
