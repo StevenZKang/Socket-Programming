@@ -4,7 +4,7 @@
 #define MAX_MSG 128
 #define MAX_WORD 20
 #define MAX_BUF 256
-#define MAX_GUESSES 4
+#define MAX_GUESSES 26
 #define NUM_LETTERS 26
 #define WELCOME_MSG "Welcome to our word game. What is your name? "
 #define INVALID_NAME "Invalid Name. Please enter a new name." 
@@ -12,6 +12,8 @@
 #define NOT_YOUR_TURN "It is not your turn to guess."
 #define YOU_WIN "Game over! You win!"
 #define INVALID_GUESS "Invalid Guess. Please enter a new lower case letter."
+#define NO_GUESSES "No more guesses. "
+#define NEW_GAME "\n\nLet's start a new game\n" 
 
 struct client {
     int fd;
@@ -47,4 +49,5 @@ char *status_message(char *msg, struct game_state *game);
 
 int player_guess(struct game_state *game, char letter);
 int unique_name(struct client *p, char *name);
+
 

@@ -86,11 +86,11 @@ int player_guess(struct game_state *game, char letter){
 	while(game->word[i]){
 		if (game->word[i] == letter){
 			game->guess[i] = letter; 
-			game->letters_guessed[letter - 'a'] = 1; 
 			correct = 1;
 		}
 		i++;
 	}
+	game->letters_guessed[letter - 'a'] = 1; 
 	game->guesses_left -= 1;
 	return correct; 
 }
