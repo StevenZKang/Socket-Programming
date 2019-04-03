@@ -150,7 +150,7 @@ void announce_guess(struct game_state *game, char *name, const char *guess, int 
 
 /* Move the has_next_turn pointer to the next active client */
 void advance_turn(struct game_state *game){
-	printf("Changing Turn"); 
+
 	if(game->has_next_turn->next == NULL){
 		game->has_next_turn = game->head; 
 	}else{

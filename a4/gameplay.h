@@ -4,7 +4,7 @@
 #define MAX_MSG 128
 #define MAX_WORD 20
 #define MAX_BUF 256
-#define MAX_GUESSES 26
+#define MAX_GUESSES 4
 #define NUM_LETTERS 26
 #define WELCOME_MSG "Welcome to our word game. What is your name? "
 #define INVALID_NAME "Invalid Name. Please enter a new name." 
