@@ -6,7 +6,7 @@
 #define MAX_BUF 256
 #define MAX_GUESSES 4
 #define NUM_LETTERS 26
-#define WELCOME_MSG "Welcome to our word game. What is your name? "
+#define WELCOME_MSG "Welcome to our word game. What is your name?\r\n"
 #define INVALID_NAME "Invalid Name. Please enter a new name." 
 #define YOUR_TURN "Your guess?"
 #define NOT_YOUR_TURN "It is not your turn to guess."
